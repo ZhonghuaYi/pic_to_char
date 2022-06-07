@@ -5,6 +5,9 @@
 cpp/.idea/
 cpp/.vscode/
 cpp/cmake-build-debug/
+!cpp/bin
+!cpp/bin/.keep
+cpp/bin
 
 python/.idea/
 python/.vscode/
