@@ -16,11 +16,11 @@ class Pic:
     def show(self, image_type=None, window_name=None, delay=0):
         try:
             if image_type == "binary":
-                if self.binary is not None:
+                if self.binary is None:
                     raise TypeError("Object attribute 'binary' is None.")
                 image = self.binary
             elif image_type == "edge":
-                if self.edge is not None:
+                if self.edge is None:
                     raise TypeError("Object attribute 'edge' is None.")
                 image = self.edge
             else:
@@ -55,7 +55,7 @@ class Pic:
     def to_edge(self, thresh1, thresh2, use_binary=False):
         try:
             if use_binary:
-                if self.binary is not None:
+                if self.binary is None:
                     raise TypeError("Object attribute 'binary' is None.")
                 self.edge = cv.Canny(self.binary, thresh1, thresh2)
             else:
@@ -80,7 +80,7 @@ class CharPic(Pic):
         self.__charSet = ".\'`^\",:Il!i><~+_-?]}1)|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkho*#MW&8%B@$"
 
     def binary_to_char(self, char_set=None):
-        if not char_set:
+        if char_set is None:
             char_set = self.__charSet
         # char_matrix = np.zeros(shape=self.binary.shape, dtype=str)
         binary = self.binary
