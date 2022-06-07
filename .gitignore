@@ -1,0 +1,10 @@
+.vscode/
+.vs/
+.idea/
+
+cpp/.idea/
+cpp/.vscode/
+cpp/cmake-build-debug/
+
+python/.idea/
+python/.vscode/
