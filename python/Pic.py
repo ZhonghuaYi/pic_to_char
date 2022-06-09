@@ -7,6 +7,8 @@ import numpy as np
 import cv2 as cv
 from PIL import Image
 
+from PicProcess import PicProcess
+
 
 class Pic:
     def __init__(self, image):
@@ -52,12 +54,11 @@ class Pic:
             new_size[0] = self.image.shape[1]
         if size[1] == 0:
             new_size[1] = self.image.shape[0]
-        resized_image = cv.resize(self.image, dsize=new_size)
+        self.image = cv.resize(self.image, dsize=new_size)
         if fx == 1 and fy == 1:
             return
         else:
-            resized_image = cv.resize(resized_image, (0, 0), fx=fx, fy=fy)
-        self.image = resized_image
+            self.image = cv.resize(self.image, (0, 0), fx=fx, fy=fy)
         return
 
 
@@ -79,10 +80,16 @@ class ColorPic(Pic):
             self.image = cv.cvtColor(self.image, cv.COLOR_GRAY2BGR)
 
 
+class EdgePic(GrayPic):
+    def __init__(self, image, canny_th1, canny_th2):
+        self.image = None
+        super().__init__(image)
+        self.image = PicProcess.gray_to_edge(GrayPic(image), canny_th1, canny_th2)
+
+
 if __name__ == '__main__':
     image = "./test.jpg"
     a = Pic(image)
-    i = GrayPic(a)
     a.resize((200, 200))
     print(a.image.shape)
     a.show()
