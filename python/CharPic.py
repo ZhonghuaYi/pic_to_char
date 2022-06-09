@@ -248,6 +248,8 @@ class CharPic(Pic):
 if __name__ == '__main__':
     image = "./test.jpg"
     font_path = "C:/Windows/Fonts/Monaco.ttf"
-    i = Pic(image)
-    i.to_binary_and_edge(20, 80)
-    i.show("edge")
+    i = cv.imread(image, 0)
+    a = cv.resize(i, (200, 300), fx=0.5, fy=1)
+    print(i.size, a.shape)
+    # i.to_binary_and_edge(20, 80)
+    # i.show("edge")
