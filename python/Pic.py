@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*- 
+# -*- coding: utf-8 -*-
 # @Author:  ZhonghuaYi
 # @Time  :  2022-06-09
 
@@ -7,12 +7,14 @@ import numpy as np
 import cv2 as cv
 from PIL import Image
 
-from PicProcess import PicProcess
-
 
 class Pic:
     def __init__(self, image):
-        """Make sure self.image is a ndarray object."""
+        """ Initialize new object.
+
+        Args:
+            image: str or numpy.ndarray or Pic or PIL.Image.Image.
+        """
         self.image = None
         if isinstance(image, str):
             self.image = cv.imread(image, 1)
@@ -34,6 +36,16 @@ class Pic:
             sys.exit()
 
     def __getattribute__(self, item):
+        """ Auto run when use object's attribute.
+
+        If attribute is None, will occur an exception.
+
+        Args:
+            item:
+
+        Returns:
+
+        """
         item_value = super().__getattribute__(item)
         try:
             if item_value is None:
@@ -62,34 +74,7 @@ class Pic:
         return
 
 
-class GrayPic(Pic):
-    def __init__(self, image):
-        """Make sure self.image is a 2-d ndarray object."""
-        self.image = None
-        super().__init__(image)
-        if self.image.ndim == 3:
-            self.image = cv.cvtColor(self.image, cv.COLOR_BGR2GRAY)
-
-
-class ColorPic(Pic):
-    def __init__(self, image):
-        """Make sure self.image is a 3-d ndarray object."""
-        self.image = None
-        super().__init__(image)
-        if self.image.ndim == 2:
-            self.image = cv.cvtColor(self.image, cv.COLOR_GRAY2BGR)
-
-
-class EdgePic(GrayPic):
-    def __init__(self, image, canny_th1, canny_th2):
-        self.image = None
-        super().__init__(image)
-        self.image = PicProcess.gray_to_edge(GrayPic(image), canny_th1, canny_th2)
-
-
 if __name__ == '__main__':
-    image = "./test.jpg"
-    a = Pic(image)
-    a.resize((200, 200))
-    print(a.image.shape)
-    a.show()
+    path = "./test.jpg"
+    i = Pic(path)
+    print(i.c)
