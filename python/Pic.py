@@ -75,6 +75,4 @@ class Pic:
 
 
 if __name__ == '__main__':
-    path = "./test.jpg"
-    i = Pic(path)
-    print(i.c)
+    pass
