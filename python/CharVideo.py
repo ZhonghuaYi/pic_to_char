@@ -60,7 +60,7 @@ class Video:
         try:
             while ret:
                 pic = Pic(frame)
-                pic.resize((240, 180))
+                # pic.resize((240, 180))
                 yield pic
                 ret, frame = v.read()
         except Exception as e:
