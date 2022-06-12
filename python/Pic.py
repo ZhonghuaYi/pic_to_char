@@ -289,6 +289,7 @@ class CharPic(GrayPic):
             fy (float, optional): Vertical stretching ratio. Defaults to 1..
         """
         new_size = list(size)
+        image_type = "_" + image_type
         image = self.__getattribute__(image_type)
         if size[0] == 0:
             new_size[0] = image.shape[1]
@@ -303,4 +304,13 @@ class CharPic(GrayPic):
 
 
 if __name__ == '__main__':
-    pass
+    import time
+    t1 = time.time()
+    font_path = "C:/Windows/Fonts/Monaco.ttf"
+    path = "./test.jpg"
+    image = CharPic(path)
+    image.resize(size=(200, 200))
+    image.generate_matrix_and_image(font_path, 5)
+    t2 = time.time()
+    print(t2-t1)
+    image.show('', image_type="char_image")
