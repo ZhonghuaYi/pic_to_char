@@ -9,6 +9,6 @@ from Pic import *
 
 if __name__ == '__main__':
     image = "./test.jpg"
-    font_path = "C:/Windows/Fonts/Monaco.ttf"
+    font_path = "./Monaco.ttf"
     image = CharPic(1)
     image.show()
