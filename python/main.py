@@ -10,5 +10,5 @@ from Pic import *
 if __name__ == '__main__':
     image = "./test.jpg"
     font_path = "./Monaco.ttf"
-    image = CharPic(1)
-    image.show()
+    image = CharPic(image)
+    print(dir(image))
