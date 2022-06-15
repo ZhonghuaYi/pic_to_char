@@ -235,7 +235,7 @@ class CharPic(GrayPic):
         """
         np.savetxt(file_path, self._char_matrix, fmt="%s")
 
-    def generate_char_image(self, font_path, font_size, color=(255, 255, 255)):
+    def generate_char_image(self, font_path=None, font_size=5, color=(255, 255, 255)):
         """Generate char image from char matrix.
 
         Args:
@@ -247,22 +247,31 @@ class CharPic(GrayPic):
             ndarray: char image.
         """
         matrix_shape = self._char_matrix.shape
-        font = ImageFont.truetype(font_path, font_size)
-        canvas_size = (matrix_shape[1] * font_size,
-                       matrix_shape[0] * font_size)
-        canvas = Image.new("RGB", canvas_size)
-        canvas_draw = ImageDraw.Draw(canvas)
-        for i in range(matrix_shape[0]):
-            for j in range(matrix_shape[1]):
-                canvas_draw.text((j * font_size, i * font_size),
-                                 self._char_matrix[i][j],
-                                 font=font,
-                                 fill=color)
-        char_image = cv.cvtColor(np.asarray(canvas), cv.COLOR_RGB2BGR)
-        self._char_image = char_image
+        if font_path is None:
+            canvas_size = (matrix_shape[1] * 7, matrix_shape[0] * 7)
+            canvas = np.zeros(canvas_size, dtype=np.uint8)
+            for i in range(matrix_shape[0]):
+                for j in range(matrix_shape[1]):
+                    cv.putText(canvas, self._char_matrix[i, j], (j * 7, i * 7), 1, 0.5, color)
+        else:
+            font = ImageFont.truetype(font_path, font_size)
+            canvas_size = (matrix_shape[1] * font_size,
+                           matrix_shape[0] * font_size)
+            canvas = Image.new("RGB", canvas_size)
+            canvas_draw = ImageDraw.Draw(canvas)
+            for i in range(matrix_shape[0]):
+                for j in range(matrix_shape[1]):
+                    canvas_draw.text((j * font_size, i * font_size),
+                                     self._char_matrix[i][j],
+                                     font=font,
+                                     fill=color)
+            canvas = cv.cvtColor(np.asarray(canvas), cv.COLOR_RGB2BGR)
+        # cv.imshow("char_image", canvas)
+        # cv.waitKey(0)
+        self._char_image = canvas
         return self._char_image
 
-    def generate_matrix_and_image(self, font_path, font_size, charset=None, color=(255, 255, 255)):
+    def generate_matrix_and_image(self, font_path=None, font_size=5, charset=None, color=(255, 255, 255)):
         self.generate_char_matrix(charset)
         self.generate_char_image(font_path, font_size, color)
 
@@ -306,11 +315,11 @@ class CharPic(GrayPic):
 if __name__ == '__main__':
     import time
     t1 = time.time()
-    font_path = "C:/Windows/Fonts/Monaco.ttf"
+    font_path = "./Monaco.ttf"
     path = "./test.jpg"
     image = CharPic(path)
-    image.resize(size=(200, 200))
-    image.generate_matrix_and_image(font_path, 5)
+    image.resize(size=(300, 300))
+    image.generate_matrix_and_image()
     t2 = time.time()
     print(t2-t1)
     image.show('', image_type="char_image")
