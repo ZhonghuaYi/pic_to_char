@@ -248,11 +248,12 @@ class CharPic(GrayPic):
         """
         matrix_shape = self._char_matrix.shape
         if font_path is None:
-            canvas_size = (matrix_shape[1] * 7, matrix_shape[0] * 7)
+            canvas_size = (matrix_shape[0] * 7, matrix_shape[1] * 7)
             canvas = np.zeros(canvas_size, dtype=np.uint8)
             for i in range(matrix_shape[0]):
                 for j in range(matrix_shape[1]):
                     cv.putText(canvas, self._char_matrix[i, j], (j * 7, i * 7), 1, 0.5, color)
+            canvas = cv.cvtColor(canvas, cv.COLOR_GRAY2BGR)
         else:
             font = ImageFont.truetype(font_path, font_size)
             canvas_size = (matrix_shape[1] * font_size,
@@ -318,8 +319,9 @@ if __name__ == '__main__':
     font_path = "./Monaco.ttf"
     path = "./test.jpg"
     image = CharPic(path)
-    image.resize(size=(300, 300))
+    image.resize(size=(200, 200))
     image.generate_matrix_and_image()
     t2 = time.time()
     print(t2-t1)
-    image.show('', image_type="char_image")
+    print(image.char_image.shape)
+    # image.show('', image_type="char_image")

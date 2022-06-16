@@ -6,12 +6,12 @@ from Pic import *
 
 
 class Video:
-    def __init__(self, video_path):
+    def __init__(self, video_path, new_size=None, fx=1., fy=1.):
         self._video_path = video_path
         self._video = cv.VideoCapture(self._video_path)
         self._frame_count = self._video.get(cv.CAP_PROP_FRAME_COUNT)
         self._fps = self._video.get(cv.CAP_PROP_FPS)
-        self._frames = self._load()
+        self._frames = self._load(new_size, fx, fy)
 
     def __getattribute__(self, item):
         """ Auto run when use object's attribute.
@@ -54,13 +54,14 @@ class Video:
     def frames(self):
         return self._frames
 
-    def _load(self):
+    def _load(self, new_size=None, fx=1., fy=1.):
         v = self.video
         ret, frame = v.read()
         try:
             while ret:
                 pic = Pic(frame)
-                # pic.resize((240, 180))
+                if new_size is not None:
+                    pic.resize(new_size, fx, fy)
                 yield pic
                 ret, frame = v.read()
         except Exception as e:
@@ -89,7 +90,7 @@ class CharVideo(Video):
     def char_frames(self):
         return self._char_frames
 
-    def generate_char_frames(self, font_path, font_size, charset=None, color=(255, 255, 255)):
+    def generate_char_frames(self, font_path=None, font_size=5, charset=None, color=(255, 255, 255)):
         frames = self.frames
 
         def char_frame_iter():
@@ -115,15 +116,36 @@ class CharVideo(Video):
             writer.write(char_frame.char_image)
         print("Video saved.")
 
+    def play(self, video_type="frames", speed=1.):
+        try:
+            frames = None
+            if video_type == "frames":
+                frames = self.frames
+            elif video_type == "char_frames":
+                frames = self.char_frames
+            else:
+                raise ValueError(f"Video type '{video_type}' is not supported.")
+            frame_delay = int(1000 / (self.fps * speed))
+            window_name = self.video_path
+            for frame in frames:
+                if video_type == "frames":
+                    cv.imshow(window_name, frame.image)
+                elif video_type == "char_frames":
+                    cv.imshow(window_name, frame.char_image)
+                if cv.waitKey(frame_delay) == ord('q'):
+                    break
+        except Exception as e:
+            print(e)
+            sys.exit()
+
 
 if __name__ == '__main__':
-    font_path = "C:/Windows/Fonts/Monaco.ttf"
+    import time
+    time_start = time.time()
+    font_path = "./Monaco.ttf"
     path = "./test.mp4"
     v = CharVideo(path)
-    # for i in range(100):
-    #     v.frames.__next__()
-    # i = CharPic(v.frames.__next__())
-    # i.generate_matrix_and_image(font_path, 3)
-    # i.show(image_type="char_image")
-    v.generate_char_frames(font_path, 3)
+    v.generate_char_frames()
     v.save_char_video("./1.mp4", "mp4v", v.fps)
+    time_end = time.time()
+    print(f"Time used: {time_end - time_start}")
