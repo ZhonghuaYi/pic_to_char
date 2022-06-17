@@ -4,6 +4,8 @@
 
 cpp/.idea/
 cpp/.vscode/
+cpp/.vs/
+cpp/out/
 cpp/cmake-build-debug/
 !cpp/bin
 !cpp/bin/.keep

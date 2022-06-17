@@ -3,6 +3,7 @@
 # @Time  :  2022-06-09
 
 import sys
+import threading
 import numpy as np
 import cv2 as cv
 from PIL import Image, ImageDraw, ImageFont
@@ -124,11 +125,11 @@ class BinaryPic(GrayPic):
                     raise ValueError(
                         f"Wrong input variable: 'thresh'={thresh}")
                 self._th, self._image = cv.threshold(self._image, thresh, 255,
-                                                   cv.THRESH_BINARY)
+                                                     cv.THRESH_BINARY)
             elif method == 1:
                 self._image = cv.adaptiveThreshold(self.gray, 255,
-                                                  cv.ADAPTIVE_THRESH_MEAN_C,
-                                                  cv.THRESH_BINARY, 5, 0)
+                                                   cv.ADAPTIVE_THRESH_MEAN_C,
+                                                   cv.THRESH_BINARY, 5, 0)
                 self._th = -1
             else:
                 raise ValueError(f"Wrong input variable: 'method'={method}")
@@ -151,11 +152,11 @@ class BinaryPic(GrayPic):
         super().resize(size=size, fx=fx, fy=fy)
         if 0 < self._th < 255:
             _, self._image = cv.threshold(self._image, self._th, 255,
-                                         cv.THRESH_BINARY)
+                                          cv.THRESH_BINARY)
         elif self._th == -1:
             self._image = cv.adaptiveThreshold(self.gray, 255,
-                                              cv.ADAPTIVE_THRESH_MEAN_C,
-                                              cv.THRESH_BINARY, 5, 0)
+                                               cv.ADAPTIVE_THRESH_MEAN_C,
+                                               cv.THRESH_BINARY, 5, 0)
 
 
 class EdgePic(BinaryPic):
@@ -182,6 +183,28 @@ class EdgePic(BinaryPic):
         except Exception as e:
             print(e)
             sys.exit()
+
+
+class CharThread(threading.Thread):
+    def __init__(self, char_matrix, color):
+        super().__init__()
+        self._canvas = None
+        self._char_matrix = char_matrix
+        self._matrix_shape = char_matrix.shape
+        self._color = color
+
+    def run(self):
+        canvas_size = (self._matrix_shape[0] * 7, self._matrix_shape[1] * 7)
+        canvas = np.zeros(canvas_size, dtype=np.uint8)
+        for i in range(self._matrix_shape[0]):
+            for j in range(self._matrix_shape[1]):
+                cv.putText(canvas, self._char_matrix[i, j], (j * 7, i * 7), 1,
+                           0.5, self._color)
+        canvas = cv.cvtColor(canvas, cv.COLOR_GRAY2BGR)
+        self._canvas = canvas
+
+    def get_canvas(self):
+        return self._canvas
 
 
 class CharPic(GrayPic):
@@ -222,8 +245,7 @@ class CharPic(GrayPic):
             charset = self.__charSet
         charset = np.asarray(list(charset), dtype=str)
         gray = self.image
-        char_matrix = charset[(gray / (256 / charset.size)).astype(
-            np.int32)]
+        char_matrix = charset[(gray / (256 / charset.size)).astype(np.int32)]
         self._char_matrix = char_matrix
         return char_matrix
 
@@ -235,7 +257,10 @@ class CharPic(GrayPic):
         """
         np.savetxt(file_path, self._char_matrix, fmt="%s")
 
-    def generate_char_image(self, font_path=None, font_size=5, color=(255, 255, 255)):
+    def generate_char_image(self,
+                            font_path=None,
+                            font_size=5,
+                            color=(255, 255, 255)):
         """Generate char image from char matrix.
 
         Args:
@@ -248,12 +273,32 @@ class CharPic(GrayPic):
         """
         matrix_shape = self._char_matrix.shape
         if font_path is None:
-            canvas_size = (matrix_shape[0] * 7, matrix_shape[1] * 7)
-            canvas = np.zeros(canvas_size, dtype=np.uint8)
-            for i in range(matrix_shape[0]):
-                for j in range(matrix_shape[1]):
-                    cv.putText(canvas, self._char_matrix[i, j], (j * 7, i * 7), 1, 0.5, color)
-            canvas = cv.cvtColor(canvas, cv.COLOR_GRAY2BGR)
+            use_thread = False
+            if use_thread:
+                threads = []
+                sub_rows = matrix_shape[0] // 5
+                for i in range(5):
+                    threads.append(
+                        CharThread(
+                            self._char_matrix[i * sub_rows:(i + 1) * sub_rows, :],
+                            color))
+                for t in threads:
+                    t.start()
+                for t in threads:
+                    t.join()
+                canvas = np.zeros((matrix_shape[0] * 7, matrix_shape[1] * 7, 3),
+                                  dtype=np.uint8)
+                for i in range(5):
+                    canvas[i * sub_rows * 7:(i + 1) * sub_rows * 7, :, :] = threads[
+                        i].get_canvas()
+            else:
+                canvas_size = (matrix_shape[0] * 7, matrix_shape[1] * 7)
+                canvas = np.zeros(canvas_size, dtype=np.uint8)
+                for i in range(matrix_shape[0]):
+                    for j in range(matrix_shape[1]):
+                        cv.putText(canvas, self._char_matrix[i, j], (j * 7, i * 7),
+                                   1, 0.5, color)
+                canvas = cv.cvtColor(canvas, cv.COLOR_GRAY2BGR)
         else:
             font = ImageFont.truetype(font_path, font_size)
             canvas_size = (matrix_shape[1] * font_size,
@@ -272,7 +317,11 @@ class CharPic(GrayPic):
         self._char_image = canvas
         return self._char_image
 
-    def generate_matrix_and_image(self, font_path=None, font_size=5, charset=None, color=(255, 255, 255)):
+    def generate_matrix_and_image(self,
+                                  font_path=None,
+                                  font_size=5,
+                                  charset=None,
+                                  color=(255, 255, 255)):
         self.generate_char_matrix(charset)
         self.generate_char_image(font_path, font_size, color)
 
@@ -319,9 +368,9 @@ if __name__ == '__main__':
     font_path = "./Monaco.ttf"
     path = "./test.jpg"
     image = CharPic(path)
-    image.resize(size=(200, 200))
+    image.resize(size=(150, 150))
     image.generate_matrix_and_image()
     t2 = time.time()
-    print(t2-t1)
+    print(t2 - t1)
     print(image.char_image.shape)
-    # image.show('', image_type="char_image")
+    image.show('', image_type="char_image")
