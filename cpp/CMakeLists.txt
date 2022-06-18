@@ -1,7 +1,10 @@
 cmake_minimum_required(VERSION 3.21)
-project(pic_to_char)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
+add_definitions(-std=c++17)
+set(CMAKE_CXX_FLAGS "-std=c++17")
+
+project(pic_to_char)
 
 find_package(OpenCV REQUIRED)
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)

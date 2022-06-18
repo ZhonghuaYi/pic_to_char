@@ -4,7 +4,6 @@
 #include<opencv2/core.hpp>
 #include<opencv2/highgui.hpp>
 #include<opencv2/imgproc.hpp>
-#include <utility>
 
 using namespace std;
 using namespace cv;
@@ -15,11 +14,11 @@ public:
 
     explicit Pic(Mat img);
 
-    explicit Pic(string path);
+    explicit Pic(const string& path);
 
-    Mat getImage() const;
+    [[nodiscard]] Mat getImage() const;
 
-    void show(string window_name = "", int delay = 0);
+    void show(const string& window_name = "", int delay = 0);
 
     void resize(Size size = Size(0, 0), double fx = 1., double fy = 1.);
 
@@ -31,27 +30,30 @@ class ColorPic : public Pic {
 public:
     ColorPic() : Pic() {};
 
-    explicit ColorPic(Mat img);
+    explicit ColorPic(const Mat& img);
 
-    explicit ColorPic(string path) : Pic(std::move(path)) {};
+    explicit ColorPic(const string& path) : Pic(path) {};
 
-    explicit ColorPic(Pic const &img);
+    explicit ColorPic(const Pic& img);
 };
 
 class GrayPic : public Pic {
 public:
     GrayPic() : Pic() {};
-    explicit GrayPic(Mat img);
-    explicit GrayPic(string path);
-    explicit GrayPic(Pic const &img);
+    explicit GrayPic(const Mat& img);
+    explicit GrayPic(const string& path);
+    explicit GrayPic(const Pic& img);
 };
 
 class BinaryPic : public GrayPic {
 protected:
-    int th;
+    double th;
 public:
     BinaryPic():GrayPic(),th(-1){};
-    BinaryPic(Mat img);
-    BinaryPic(string path);
-    BinaryPic(Pic const & img)
+
+    explicit BinaryPic(const Mat& img, int method=0, double thresh=-1);
+
+    explicit BinaryPic(const string& path, int method=0, double thresh=-1);
+
+    explicit BinaryPic(Pic const & img, int method=0, double thresh=-1);
 };
