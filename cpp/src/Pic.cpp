@@ -10,10 +10,6 @@ Pic::Pic(string path)
     this->image = imread(path);
 }
 
-Pic::Pic(const Pic &img) {
-    this->image = img.image;
-}
-
 void Pic::show(string window_name, int delay)
 {
     imshow(window_name, this->image);
@@ -35,8 +31,44 @@ void Pic::resize(Size size, double fx, double fy)
     return;
 }
 
-Mat Pic::getImage() {
+Mat Pic::getImage() const{
     return this->image;
 }
 
+ColorPic::ColorPic(Mat img){
+    if(img.channels() == 1)
+        cvtColor(img, this->image, COLOR_GRAY2BGR);
+}
 
+ColorPic::ColorPic(Pic const &img) {
+    Mat pic_image = img.getImage();
+    if(pic_image.channels() == 1)
+        cvtColor(pic_image, this->image, COLOR_GRAY2BGR);
+}
+
+GrayPic::GrayPic(Mat img){
+    if(img.channels() == 3)
+        cvtColor(img, this->image, COLOR_BGR2GRAY);
+}
+
+GrayPic::GrayPic(string path){
+    this->image = imread(path, 0);
+}
+
+GrayPic::GrayPic(const Pic &img){
+    Mat pic_image = img.getImage();
+    if(pic_image.channels()==3)
+        cvtColor(pic_image, this->image, COLOR_BGR2GRAY);
+}
+
+BinaryPic::BinaryPic(Mat img) : GrayPic(img) {
+
+}
+
+BinaryPic::BinaryPic(string path) : GrayPic(path) {
+
+}
+
+BinaryPic::BinaryPic(const Pic &img) : GrayPic(img) {
+
+}

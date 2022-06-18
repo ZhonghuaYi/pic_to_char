@@ -8,7 +8,10 @@
 int main() {
     using namespace std;
     string path = "../test.jpg";
-    Pic image(path);
-    image.show();
+    ColorPic image(path);
+    GrayPic gray(image);
+    cout << gray.getImage().channels() <<endl;
+    Mat gray_image = gray.getImage();
+    gray.show();
     return 0;
 }
