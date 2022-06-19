@@ -8,7 +8,9 @@
 int main() {
     using namespace std;
     string path = "../test.jpg";
-//    Pic pic;
-//    pic.show();
+    BinaryPic pic(path);
+    Pic* p = &pic;
+    p->resize(Size(200, 200));
+    p->show();
     return 0;
 }

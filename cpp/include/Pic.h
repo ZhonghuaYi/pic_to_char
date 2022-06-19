@@ -20,7 +20,7 @@ public:
 
     void show(const string& window_name = "", int delay = 0);
 
-    void resize(Size size = Size(0, 0), double fx = 1., double fy = 1.);
+    virtual void resize(Size size = Size(0, 0), double fx = 1., double fy = 1.);
 
 protected:
     Mat image;
@@ -47,13 +47,18 @@ public:
 
 class BinaryPic : public GrayPic {
 protected:
-    double th;
+    double th = 0;
+    void selfThreshold(int method, double thresh);
 public:
-    BinaryPic():GrayPic(),th(-1){};
+    BinaryPic():GrayPic(),th(0){};
 
     explicit BinaryPic(const Mat& img, int method=0, double thresh=-1);
 
     explicit BinaryPic(const string& path, int method=0, double thresh=-1);
 
     explicit BinaryPic(Pic const & img, int method=0, double thresh=-1);
+
+    [[nodiscard]] double getTh() const;
+
+    void resize(Size size, double fx, double fy) override;
 };
