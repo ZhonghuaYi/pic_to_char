@@ -94,4 +94,10 @@ void BinaryPic::resize(Size size, double fx, double fy) {
         adaptiveThreshold(this->image, this->image, 255, ADAPTIVE_THRESH_MEAN_C, THRESH_BINARY, 5, 0);
 }
 
+void EdgePic::selfCanny(int th1, int th2) {
+    Canny(this->image, this->image, th1, th2);
+}
 
+EdgePic::EdgePic(const Mat &img, int th1, int th2) : BinaryPic(img) {
+    this->selfCanny(th1, th2);
+}
