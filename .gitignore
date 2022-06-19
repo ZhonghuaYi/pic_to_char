@@ -7,6 +7,7 @@ cpp/.vscode/
 cpp/.vs/
 cpp/out/
 cpp/cmake-build-debug/
+cpp/build/
 !cpp/bin
 !cpp/bin/.keep
 cpp/bin

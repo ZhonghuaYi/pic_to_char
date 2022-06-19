@@ -6,6 +6,10 @@ set(CMAKE_CXX_FLAGS "-std=c++17")
 
 project(pic_to_char)
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    set(CMAKE_EXE_LINKER_FLAGS "-lcblas")
+endif()
+
 find_package(OpenCV REQUIRED)
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 aux_source_directory(src SRC_LIST)

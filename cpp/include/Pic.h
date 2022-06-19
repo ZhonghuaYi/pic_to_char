@@ -62,3 +62,11 @@ public:
 
     void resize(Size size, double fx, double fy) override;
 };
+
+class EdgePic : public BinaryPic {
+    protected:
+    void selfCanny(int th1, int th2);
+public:
+    EdgePic() : BinaryPic() {};
+    explicit EdgePic(const Mat& img);
+};
