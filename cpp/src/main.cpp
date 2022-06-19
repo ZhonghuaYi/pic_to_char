@@ -8,9 +8,7 @@
 int main() {
     using namespace std;
     string path = "../test.jpg";
-    BinaryPic pic(path);
-    Pic* p = &pic;
-    p->resize(Size(200, 200));
-    p->show();
+    EdgePic pic(path, 20, 80);
+    pic.show();
     return 0;
 }

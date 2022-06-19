@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include<string>
+#include<vector>
 #include<opencv2/core.hpp>
 #include<opencv2/highgui.hpp>
 #include<opencv2/imgproc.hpp>
@@ -64,9 +65,29 @@ public:
 };
 
 class EdgePic : public BinaryPic {
-    protected:
+protected:
     void selfCanny(int th1, int th2);
 public:
     EdgePic() : BinaryPic() {};
-    explicit EdgePic(const Mat& img);
+    explicit EdgePic(const Mat& img, int th1, int th2);
+    explicit EdgePic(const string& path, int th1, int th2);
+    explicit EdgePic(const Pic& img, int th1, int th2);
 };
+
+class CharPic:public GrayPic{
+protected:
+    vector<string> char_matrix;
+    Mat char_image;
+private:
+    static const string char_set;
+public:
+    CharPic() : GrayPic() {};
+    explicit CharPic(const Mat& img);
+    explicit CharPic(const string& path);
+    explicit CharPic(const Pic& img);
+    [[nodiscard]] vector<string> getCharMatrix() const;
+    [[nodiscard]] Mat getCharImage() const;
+    [[nodiscard]] static string getCharSet() ;
+};
+
+const string CharPic::char_set = R"(.'`^",:Il!i><~+_-?]}1)|\/tfjrxnuvczXYUJCLQ0OZmwqpdbkho*#MW&8%B@$)";

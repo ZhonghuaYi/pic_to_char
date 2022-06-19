@@ -101,3 +101,38 @@ void EdgePic::selfCanny(int th1, int th2) {
 EdgePic::EdgePic(const Mat &img, int th1, int th2) : BinaryPic(img) {
     this->selfCanny(th1, th2);
 }
+
+EdgePic::EdgePic(const string &path, int th1, int th2) : BinaryPic(path) {
+    this->selfCanny(th1, th2);
+}
+
+EdgePic::EdgePic(const Pic &img, int th1, int th2) : BinaryPic(img) {
+    this->selfCanny(th1, th2);
+}
+
+CharPic::CharPic(const Mat &img) : GrayPic(img) {
+    this->char_matrix = vector<string>();
+    this->char_image = Mat();
+}
+
+CharPic::CharPic(const string &path) : GrayPic(path) {
+    this->char_matrix = vector<string>();
+    this->char_image = Mat();
+}
+
+CharPic::CharPic(const Pic &img) : GrayPic(img) {
+    this->char_matrix = vector<string>();
+    this->char_image = Mat();
+}
+
+vector<string> CharPic::getCharMatrix() const {
+    return this->char_matrix;
+}
+
+Mat CharPic::getCharImage() const {
+    return this->char_image;
+}
+
+string CharPic::getCharSet() {
+    return CharPic::char_set;
+}
