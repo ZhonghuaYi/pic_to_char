@@ -1,6 +1,7 @@
 ﻿#include "Pic.h"
 #include <utility>
 #include <iostream>
+#include <fstream>
 
 Pic::Pic(Mat img) {
     this->image = std::move(img);
@@ -134,5 +135,28 @@ Mat CharPic::getCharImage() const {
 }
 
 string CharPic::getCharSet() {
-    return CharPic::char_set;
+    return CharPic::charset;
 }
+
+void CharPic::generateCharMatrix(const string& set) {
+    vector<string> matrix;
+    string string_set = set;
+    if(set.empty())
+        string_set = CharPic::charset;
+    int charset_size = int(string_set.size());
+    for(int i=0;i<this->image.rows;i++){
+        string row_char;
+        for(int j=0;j<this->image.cols;j++){
+            int index = int(this->image.at<uchar>(i, j)/(256 / charset_size));
+            row_char.push_back(string_set[index]);
+        }
+        matrix.push_back(row_char);
+    }
+    this->char_matrix = matrix;
+}
+
+void CharPic::saveCharMatrix() {
+
+}
+
+

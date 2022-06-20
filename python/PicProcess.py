@@ -55,6 +55,24 @@ class PicProcess:
             sys.exit()
         return image
 
+    @staticmethod
+    def image_resize(image, size=(0, 0), fx=1., fy=1.):
+        new_size = list(size)
+        if size[0] == 0:
+            new_size[0] = image.shape[1]
+        if size[1] == 0:
+            new_size[1] = image.shape[0]
+        image = cv.resize(image, dsize=new_size)
+        if fx == 1 and fy == 1:
+            pass
+        else:
+            image = cv.resize(image, (0, 0), fx=fx, fy=fy)
+        return image
+
+    @staticmethod
+    def image_save(image, path):
+        cv.imwrite(path, image)
+
 
 if __name__ == '__main__':
     pass

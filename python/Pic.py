@@ -78,20 +78,20 @@ class Pic:
 
         Args:
             size (tuple, optional): New size of image. Defaults to (0, 0).
-            fx (float, optional): Horizental stretching ratio. Defaults to 1..
+            fx (float, optional): Horizontal stretching ratio. Defaults to 1..
             fy (float, optional): Vertical stretching ratio. Defaults to 1..
         """
-        new_size = list(size)
-        if size[0] == 0:
-            new_size[0] = self._image.shape[1]
-        if size[1] == 0:
-            new_size[1] = self._image.shape[0]
-        self._image = cv.resize(self._image, dsize=new_size)
-        if fx == 1 and fy == 1:
-            return
-        else:
-            self._image = cv.resize(self._image, (0, 0), fx=fx, fy=fy)
-        return
+        image = self.__getattribute__("_image")
+        self._image = PicProcess.image_resize(image, size, fx, fy)
+
+    def save_image(self, file_path):
+        """ Save image.
+
+        Args:
+            file_path (str): File path.
+        """
+        image = self.__getattribute__("_image")
+        cv.imwrite(file_path, image)
 
 
 class ColorPic(Pic):
@@ -126,7 +126,7 @@ class BinaryPic(GrayPic):
                         f"Wrong input variable: 'thresh'={thresh}")
                 self._th, self._image = cv.threshold(self._image, thresh, 255,
                                                      cv.THRESH_BINARY)
-            elif method == 1:
+            elif method == 2:
                 self._image = cv.adaptiveThreshold(self.gray, 255,
                                                    cv.ADAPTIVE_THRESH_MEAN_C,
                                                    cv.THRESH_BINARY, 5, 0)
@@ -146,7 +146,7 @@ class BinaryPic(GrayPic):
 
         Args:
             size (tuple, optional): New size of image. Defaults to (0, 0).
-            fx (float, optional): Horizental stretching ratio. Defaults to 1..
+            fx (float, optional): Horizontal stretching ratio. Defaults to 1..
             fy (float, optional): Vertical stretching ratio. Defaults to 1..
         """
         super().resize(size=size, fx=fx, fy=fy)
@@ -207,170 +207,5 @@ class CharThread(threading.Thread):
         return self._canvas
 
 
-class CharPic(GrayPic):
-    def __init__(self, image):
-        """
-        Initialize CharPic object.
-        Args:
-            image: str or numpy.ndarray or Pic or PIL.Image.Image.
-        """
-        self._image = None
-        self._char_matrix = None
-        self._char_image = None
-        self.__charSet = ".\'`^\",:Il!i><~+_-?]}1)|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkho*#MW&8%B@$"
-        super().__init__(image)
-
-    @property
-    def char_matrix(self):
-        return self._char_matrix
-
-    @property
-    def char_image(self):
-        return self._char_image
-
-    @property
-    def charset(self):
-        return self.__charSet
-
-    def generate_char_matrix(self, charset=None):
-        """
-        Generate char matrix from image.
-        Args:
-            charset (str, optional): Char set to represent grayscale from 0 to 255.
-                                         Defaults to None.
-        Returns:
-            ndarray: char matrix.
-        """
-        if charset is None:
-            charset = self.__charSet
-        charset = np.asarray(list(charset), dtype=str)
-        gray = self.image
-        char_matrix = charset[(gray / (256 / charset.size)).astype(np.int32)]
-        self._char_matrix = char_matrix
-        return char_matrix
-
-    def save_char_matrix(self, file_path):
-        """Save char matrix to file.
-
-        Args:
-            file_path (str): File path to save char matrix.
-        """
-        np.savetxt(file_path, self._char_matrix, fmt="%s")
-
-    def generate_char_image(self,
-                            font_path=None,
-                            font_size=5,
-                            color=(255, 255, 255)):
-        """Generate char image from char matrix.
-
-        Args:
-            font_path (str): Path to font file.
-            font_size (int): Font size.
-            color (tuple, optional): Font color. Defaults to (255, 255, 255).
-
-        Returns:
-            ndarray: char image.
-        """
-        matrix_shape = self._char_matrix.shape
-        if font_path is None:
-            use_thread = False
-            if use_thread:
-                threads = []
-                sub_rows = matrix_shape[0] // 5
-                for i in range(5):
-                    threads.append(
-                        CharThread(
-                            self._char_matrix[i * sub_rows:(i + 1) * sub_rows, :],
-                            color))
-                for t in threads:
-                    t.start()
-                for t in threads:
-                    t.join()
-                canvas = np.zeros((matrix_shape[0] * 7, matrix_shape[1] * 7, 3),
-                                  dtype=np.uint8)
-                for i in range(5):
-                    canvas[i * sub_rows * 7:(i + 1) * sub_rows * 7, :, :] = threads[
-                        i].get_canvas()
-            else:
-                canvas_size = (matrix_shape[0] * 7, matrix_shape[1] * 7)
-                canvas = np.zeros(canvas_size, dtype=np.uint8)
-                for i in range(matrix_shape[0]):
-                    for j in range(matrix_shape[1]):
-                        cv.putText(canvas, self._char_matrix[i, j], (j * 7, i * 7),
-                                   1, 0.5, color)
-                canvas = cv.cvtColor(canvas, cv.COLOR_GRAY2BGR)
-        else:
-            font = ImageFont.truetype(font_path, font_size)
-            canvas_size = (matrix_shape[1] * font_size,
-                           matrix_shape[0] * font_size)
-            canvas = Image.new("RGB", canvas_size)
-            canvas_draw = ImageDraw.Draw(canvas)
-            for i in range(matrix_shape[0]):
-                for j in range(matrix_shape[1]):
-                    canvas_draw.text((j * font_size, i * font_size),
-                                     self._char_matrix[i][j],
-                                     font=font,
-                                     fill=color)
-            canvas = cv.cvtColor(np.asarray(canvas), cv.COLOR_RGB2BGR)
-        # cv.imshow("char_image", canvas)
-        # cv.waitKey(0)
-        self._char_image = canvas
-        return self._char_image
-
-    def generate_matrix_and_image(self,
-                                  font_path=None,
-                                  font_size=5,
-                                  charset=None,
-                                  color=(255, 255, 255)):
-        self.generate_char_matrix(charset)
-        self.generate_char_image(font_path, font_size, color)
-
-    def show(self, window_name='', image_type="image", delay=0):
-        """Show image.
-
-        Args:
-            window_name (str, optional): Window's name. Defaults to ''.
-            image_type (str, optional): Image type. Defaults to "image".
-            delay (int, optional): Time that window delay. Defaults to 0.
-        """
-        image = self.__getattribute__(image_type)
-        cv.imshow(window_name, image)
-        cv.waitKey(delay)
-        sys.exit()
-
-    def resize(self, image_type="image", size=(0, 0), fx=1., fy=1.):
-        """Resize image.
-
-        Args:
-            image_type (str, optional): Image type. Defaults to "image".
-            size (tuple, optional): New size of image. Defaults to (0, 0).
-            fx (float, optional): Horizental stretching ratio. Defaults to 1..
-            fy (float, optional): Vertical stretching ratio. Defaults to 1..
-        """
-        new_size = list(size)
-        image_type = "_" + image_type
-        image = self.__getattribute__(image_type)
-        if size[0] == 0:
-            new_size[0] = image.shape[1]
-        if size[1] == 0:
-            new_size[1] = image.shape[0]
-        self.__dict__[image_type] = cv.resize(image, dsize=new_size)
-        if fx == 1 and fy == 1:
-            return
-        else:
-            self.__dict__[image_type] = cv.resize(image, (0, 0), fx=fx, fy=fy)
-        return
-
-
 if __name__ == '__main__':
-    import time
-    t1 = time.time()
-    font_path = "./Monaco.ttf"
-    path = "./test.jpg"
-    image = CharPic(path)
-    image.resize(size=(150, 150))
-    image.generate_matrix_and_image()
-    t2 = time.time()
-    print(t2 - t1)
-    print(image.char_image.shape)
-    image.show('', image_type="char_image")
+    pass

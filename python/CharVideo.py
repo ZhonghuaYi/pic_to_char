@@ -2,7 +2,7 @@
 # @Author:  ZhonghuaYi
 # @Time  :  2022-06-08
 
-from Pic import *
+from CharPic import *
 
 
 class Video:
@@ -95,8 +95,8 @@ class CharVideo(Video):
 
         def char_frame_iter():
             for frame in frames:
-                char_pic = CharPic(frame)
-                char_pic.generate_matrix_and_image(font_path, font_size, charset, color)
+                char_pic = CharPic()
+                char_pic.generate_matrix_and_image(frame.image, font_path, font_size, charset, color)
                 yield char_pic
 
         self._char_frames = char_frame_iter()

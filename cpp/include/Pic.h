@@ -79,7 +79,7 @@ protected:
     vector<string> char_matrix;
     Mat char_image;
 private:
-    static const string char_set;
+    static const string charset;
 public:
     CharPic() : GrayPic() {};
     explicit CharPic(const Mat& img);
@@ -87,7 +87,9 @@ public:
     explicit CharPic(const Pic& img);
     [[nodiscard]] vector<string> getCharMatrix() const;
     [[nodiscard]] Mat getCharImage() const;
-    [[nodiscard]] static string getCharSet() ;
+    [[nodiscard]] static string getCharSet();
+    void generateCharMatrix(const string& set="");
+    void saveCharMatrix(string path);
 };
 
-const string CharPic::char_set = R"(.'`^",:Il!i><~+_-?]}1)|\/tfjrxnuvczXYUJCLQ0OZmwqpdbkho*#MW&8%B@$)";
+const string CharPic::charset = R"(.'`^",:Il!i><~+_-?]}1)|\/tfjrxnuvczXYUJCLQ0OZmwqpdbkho*#MW&8%B@$)";
