@@ -23,6 +23,8 @@ public:
 
     virtual void resize(Size size = Size(0, 0), double fx = 1., double fy = 1.);
 
+    void saveImage(const string& file_path);
+
 protected:
     Mat image;
 };
@@ -74,22 +76,3 @@ public:
     explicit EdgePic(const Pic& img, int th1, int th2);
 };
 
-class CharPic:public GrayPic{
-protected:
-    vector<string> char_matrix;
-    Mat char_image;
-private:
-    static const string charset;
-public:
-    CharPic() : GrayPic() {};
-    explicit CharPic(const Mat& img);
-    explicit CharPic(const string& path);
-    explicit CharPic(const Pic& img);
-    [[nodiscard]] vector<string> getCharMatrix() const;
-    [[nodiscard]] Mat getCharImage() const;
-    [[nodiscard]] static string getCharSet();
-    void generateCharMatrix(const string& set="");
-    void saveCharMatrix(string path);
-};
-
-const string CharPic::charset = R"(.'`^",:Il!i><~+_-?]}1)|\/tfjrxnuvczXYUJCLQ0OZmwqpdbkho*#MW&8%B@$)";

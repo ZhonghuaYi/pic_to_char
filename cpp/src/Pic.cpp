@@ -1,7 +1,6 @@
 ﻿#include "Pic.h"
 #include <utility>
 #include <iostream>
-#include <fstream>
 
 Pic::Pic(Mat img) {
     this->image = std::move(img);
@@ -27,6 +26,10 @@ void Pic::resize(Size size, double fx, double fy) {
         return;
     else
         cv::resize(this->image, this->image, Size(0, 0), fx, fy);
+}
+
+void Pic::saveImage(const string& file_path){
+    imwrite(file_path, this->image);
 }
 
 Mat Pic::getImage() const {
@@ -111,52 +114,5 @@ EdgePic::EdgePic(const Pic &img, int th1, int th2) : BinaryPic(img) {
     this->selfCanny(th1, th2);
 }
 
-CharPic::CharPic(const Mat &img) : GrayPic(img) {
-    this->char_matrix = vector<string>();
-    this->char_image = Mat();
-}
-
-CharPic::CharPic(const string &path) : GrayPic(path) {
-    this->char_matrix = vector<string>();
-    this->char_image = Mat();
-}
-
-CharPic::CharPic(const Pic &img) : GrayPic(img) {
-    this->char_matrix = vector<string>();
-    this->char_image = Mat();
-}
-
-vector<string> CharPic::getCharMatrix() const {
-    return this->char_matrix;
-}
-
-Mat CharPic::getCharImage() const {
-    return this->char_image;
-}
-
-string CharPic::getCharSet() {
-    return CharPic::charset;
-}
-
-void CharPic::generateCharMatrix(const string& set) {
-    vector<string> matrix;
-    string string_set = set;
-    if(set.empty())
-        string_set = CharPic::charset;
-    int charset_size = int(string_set.size());
-    for(int i=0;i<this->image.rows;i++){
-        string row_char;
-        for(int j=0;j<this->image.cols;j++){
-            int index = int(this->image.at<uchar>(i, j)/(256 / charset_size));
-            row_char.push_back(string_set[index]);
-        }
-        matrix.push_back(row_char);
-    }
-    this->char_matrix = matrix;
-}
-
-void CharPic::saveCharMatrix() {
-
-}
 
 
