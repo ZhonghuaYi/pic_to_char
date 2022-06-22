@@ -9,14 +9,15 @@ from Pic import *
 from PicProcess import PicProcess
 
 
-class CharPic:
-    def __init__(self):
+class CharPic(Pic):
+    def __init__(self, image):
         """
         Initialize CharPic object.
         """
         self._char_matrix = None
-        self._char_image = None
+        self.__image_flag = 0
         self.__charSet = ".\'`^\",:Il!i><~+_-?]}1)|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkho*#MW&8%B@$"
+        super().__init__(image)
 
     def __getattribute__(self, item):
         """ Auto run when use object's attribute.
@@ -44,23 +45,23 @@ class CharPic:
         return self._char_matrix
 
     @property
-    def char_image(self):
-        return self._char_image
+    def image_flag(self):
+        return self.__image_flag
 
     @property
     def charset(self):
         return self.__charSet
 
-    def generate_char_matrix(self, gray, charset=None):
+    def generate_char_matrix(self, charset=None):
         """
         Generate char matrix from image.
         Args:
-            gray: 2-d ndarray.
             charset (str, optional): Char set to represent grayscale from 0 to 255.
                                          Defaults to None.
         Returns:
             ndarray: char matrix.
         """
+        gray = PicProcess.image_to_gray(self.image)
         if charset is None:
             charset = self.__charSet
         charset = np.asarray(list(charset), dtype=str)
@@ -87,10 +88,12 @@ class CharPic:
     def generate_char_image(self,
                             font_path=None,
                             font_size=5,
+                            background=(0, 0, 0),
                             color=(255, 255, 255)):
         """Generate char image from char matrix.
 
         Args:
+            background (tuple, optional): Background color. Defaults to (255, 255, 255).
             font_path (str): Path to font file.
             font_size (int): Font size.
             color (tuple, optional): Font color. Defaults to (255, 255, 255).
@@ -119,13 +122,14 @@ class CharPic:
                     canvas[i * sub_rows * 7:(i + 1) * sub_rows * 7, :, :] = threads[
                         i].get_canvas()
             else:
-                canvas_size = (matrix_shape[0] * 7, matrix_shape[1] * 7)
-                canvas = np.zeros(canvas_size, dtype=np.uint8)
+                canvas_size = (matrix_shape[0] * 7, matrix_shape[1] * 7, 3)
+                canvas = np.ones(canvas_size, dtype=np.uint8)
+                for i in range(3):
+                    canvas[:, :, i] = canvas[:, :, i] * background[i]
                 for i in range(matrix_shape[0]):
                     for j in range(matrix_shape[1]):
                         cv.putText(canvas, self._char_matrix[i, j], (j * 7, i * 7),
                                    1, 0.5, color)
-                canvas = cv.cvtColor(canvas, cv.COLOR_GRAY2BGR)
         else:
             font = ImageFont.truetype(font_path, font_size)
             canvas_size = (matrix_shape[1] * font_size,
@@ -139,50 +143,18 @@ class CharPic:
                                      font=font,
                                      fill=color)
             canvas = cv.cvtColor(np.asarray(canvas), cv.COLOR_RGB2BGR)
-        # cv.imshow("char_image", canvas)
-        # cv.waitKey(0)
-        self._char_image = canvas
-        return self._char_image
+        self._image = canvas
+        self.__image_flag += 1
+        return self._image
 
     def generate_matrix_and_image(self,
-                                  gray,
                                   font_path=None,
                                   font_size=5,
                                   charset=None,
+                                  background=(0, 0, 0),
                                   color=(255, 255, 255)):
-        self.generate_char_matrix(gray, charset)
-        self.generate_char_image(font_path, font_size, color)
-
-    def show(self, window_name='', delay=0):
-        """Show image.
-
-        Args:
-            window_name (str, optional): Window's name. Defaults to ''.
-            delay (int, optional): Time that window delay. Defaults to 0.
-        """
-        image = self.__getattribute__("char_image")
-        cv.imshow(window_name, image)
-        cv.waitKey(delay)
-
-    def resize(self, size=(0, 0), fx=1., fy=1.):
-        """Resize image.
-
-        Args:
-            size (tuple, optional): New size of image. Defaults to (0, 0).
-            fx (float, optional): Horizontal stretching ratio. Defaults to 1..
-            fy (float, optional): Vertical stretching ratio. Defaults to 1..
-        """
-        image = self.__getattribute__("_char_image")
-        self._char_image = PicProcess.image_resize(image, size, fx, fy)
-
-    def save_image(self, file_path):
-        """ Save image.
-
-        Args:
-            file_path (str): File path.
-        """
-        image = self.__getattribute__("_char_image")
-        cv.imwrite(file_path, image)
+        self.generate_char_matrix(charset)
+        self.generate_char_image(font_path, font_size, background, color)
 
 
 if __name__ == '__main__':
@@ -190,10 +162,9 @@ if __name__ == '__main__':
     t1 = time.time()
     font_path = "./Monaco.ttf"
     path = "./test.jpg"
-    i = GrayPic(path)
-    i.resize((200, 200))
-    image = CharPic()
-    image.generate_matrix_and_image(i.image)
+    image = CharPic(path)
+    image.resize((200, 200))
+    image.generate_matrix_and_image(background=(255, 0, 0))
     t2 = time.time()
     print(t2 - t1)
     image.show()

@@ -1,5 +1,16 @@
 #include "PicProcess.h"
 
+cv::Mat PicProcess::ImageToGray(const cv::Mat& image) {
+    cv::Mat out;
+    if(image.channels()==1){
+        out = image;
+    }
+    else if(image.channels()==3){
+        cv::cvtColor(image, out, cv::COLOR_BGR2GRAY);
+    }
+    return out;
+}
+
 cv::Mat PicProcess::imageResize(cv::Mat image, cv::Size size, double fx, double fy){
     using namespace cv;
     Size new_size = size;

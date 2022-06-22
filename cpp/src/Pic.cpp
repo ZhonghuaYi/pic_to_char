@@ -40,8 +40,7 @@ ColorPic::ColorPic(Pic const &img) {
 }
 
 GrayPic::GrayPic(const Mat &img) {
-    if (img.channels() == 3)
-        cvtColor(img, this->image, COLOR_BGR2GRAY);
+    this->image = PicProcess::ImageToGray(img);
 }
 
 GrayPic::GrayPic(const string &path) {
