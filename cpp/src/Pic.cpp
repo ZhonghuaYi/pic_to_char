@@ -1,4 +1,5 @@
 ﻿#include "Pic.h"
+#include "PicProcess.h"
 #include <utility>
 #include <iostream>
 
@@ -16,16 +17,7 @@ void Pic::show(const string &window_name, int delay) {
 }
 
 void Pic::resize(Size size, double fx, double fy) {
-    Size new_size = size;
-    if (size.width == 0)
-        new_size.width = this->image.cols;
-    if (size.height == 0)
-        new_size.height = this->image.rows;
-    cv::resize(this->image, this->image, new_size);
-    if (fx == 1 && fy == 1)
-        return;
-    else
-        cv::resize(this->image, this->image, Size(0, 0), fx, fy);
+    this->image = PicProcess::imageResize(this->image, size, fx, fy);
 }
 
 void Pic::saveImage(const string& file_path){

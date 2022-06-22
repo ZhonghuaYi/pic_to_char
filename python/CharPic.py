@@ -163,7 +163,6 @@ class CharPic:
         image = self.__getattribute__("char_image")
         cv.imshow(window_name, image)
         cv.waitKey(delay)
-        sys.exit()
 
     def resize(self, size=(0, 0), fx=1., fy=1.):
         """Resize image.
@@ -191,10 +190,10 @@ if __name__ == '__main__':
     t1 = time.time()
     font_path = "./Monaco.ttf"
     path = "./test.jpg"
-    i = cv.imread(path, 0)
+    i = GrayPic(path)
+    i.resize((200, 200))
     image = CharPic()
-    image.generate_matrix_and_image(i)
+    image.generate_matrix_and_image(i.image)
     t2 = time.time()
     print(t2 - t1)
-    print(image.char_image.shape)
-    image.show('')
+    image.show()
