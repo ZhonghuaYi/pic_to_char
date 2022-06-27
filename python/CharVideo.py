@@ -8,9 +8,10 @@ from CharPic import *
 class Video:
     def __init__(self, video_path, new_size=None, fx=1., fy=1.):
         self._video_path = video_path
-        self._video = cv.VideoCapture(self._video_path)
-        self._frame_count = self._video.get(cv.CAP_PROP_FRAME_COUNT)
-        self._fps = self._video.get(cv.CAP_PROP_FPS)
+        v = cv.VideoCapture(self.video_path)
+        self._frame_count = v.get(cv.CAP_PROP_FRAME_COUNT)
+        self._fps = v.get(cv.CAP_PROP_FPS)
+        del v
         self._frames = self._load(new_size, fx, fy)
 
     def __getattribute__(self, item):
@@ -39,10 +40,6 @@ class Video:
         return self._video_path
 
     @property
-    def video(self):
-        return self._video
-
-    @property
     def frame_count(self):
         return self._frame_count
 
@@ -55,7 +52,9 @@ class Video:
         return self._frames
 
     def _load(self, new_size=None, fx=1., fy=1.):
-        v = self.video
+        v = cv.VideoCapture(self.video_path)
+        self._frame_count = v.get(cv.CAP_PROP_FRAME_COUNT)
+        self._fps = v.get(cv.CAP_PROP_FPS)
         ret, frame = v.read()
         try:
             while ret:
@@ -144,8 +143,9 @@ if __name__ == '__main__':
     time_start = time.time()
     font_path = "./Monaco.ttf"
     path = "./test.mp4"
-    v = CharVideo(path)
-    v.generate_char_frames()
-    v.save_char_video("./1.mp4", "mp4v", v.fps)
-    time_end = time.time()
-    print(f"Time used: {time_end - time_start}")
+    v = Video(path)
+    v.play()
+    # v.generate_char_frames()
+    # v.save_char_video("./1.mp4", "mp4v", v.fps)
+    # time_end = time.time()
+    # print(f"Time used: {time_end - time_start}")
